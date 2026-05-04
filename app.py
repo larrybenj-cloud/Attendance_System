@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, Response
 from datetime import datetime
+import io
+import csv
 
 app = Flask(__name__)
-
-# This list acts as our temporary database
 attendance_logs = []
 
 @app.route('/')
@@ -14,14 +14,25 @@ def index():
 def clock_in():
     name = request.form.get('name')
     emp_id = request.form.get('emp_id')
-    
     if name and emp_id:
-        # Capture current time in West Africa Time (WAT)
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        entry = {"name": name, "id": emp_id, "time": now}
-        attendance_logs.insert(0, entry) # Add new entries to the top
-        
+        attendance_logs.insert(0, {"name": name, "id": emp_id, "time": now})
     return redirect('/')
+
+# NEW: Function to export logs to a CSV file
+@app.route('/export')
+def export():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Name', 'Employee ID', 'Clock-In Time'])
+    for log in attendance_logs:
+        writer.writerow([log['name'], log['id'], log['time']])
+    
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=attendance_report.csv"}
+    )
 
 if __name__ == '__main__':
     app.run()
