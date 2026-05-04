@@ -2,53 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PinnaclePresence | Attendance Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinnaclePresence | Pro</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 40px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #1a73e8; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #1557b0; }
-        table { width: 100%; margin-top: 30px; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; color: #555; }
+        :root { --primary: #2563eb; --dark: #1e293b; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); margin: 0; padding: 20px; }
+        .hero { text-align: center; padding: 40px 0; background: var(--dark); color: white; border-radius: 16px; margin-bottom: -50px; }
+        .container { max-width: 800px; margin: auto; position: relative; }
+        .main-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        #liveClock { font-size: 1.5rem; font-weight: bold; color: #60a5fa; margin-top: 10px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .export-btn { background: #10b981; margin-top: 20px; display: inline-block; text-decoration: none; text-align: center; color: white; padding: 10px 20px; border-radius: 6px; }
+        table { width: 100%; margin-top: 30px; border-collapse: collapse; overflow: hidden; border-radius: 8px; }
+        th { background: #f1f5f9; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        tr:hover { background: #fdfdfd; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>PinnaclePresence</h1>
-        <p style="text-align: center; color: #666;">Employee Attendance Log</p>
-        
-        <form action="/clockin" method="POST">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Full Name" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="emp_id" placeholder="Employee ID (e.g. PIN-101)" required>
-            </div>
-            <button type="submit">Clock In</button>
-        </form>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>ID</th>
-                    <th>Time (WAT)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.name }}</td>
-                    <td>{{ log.id }}</td>
-                    <td>{{ log.time }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="hero">
+        <h1>PinnaclePresence Portal</h1>
+        <div id="liveClock">00:00:00</div>
     </div>
+
+    <div class="container">
+        <div class="main-card">
+            <form action="/clockin" method="POST">
+                <input type="text" name="name" placeholder="Employee Full Name" required>
+                <input type="text" name="emp_id" placeholder="Employee ID (e.g., PIN-2026)" required>
+                <button type="submit">Confirm Clock-In</button>
+            </form>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Recent Activity</h3>
+                <a href="/export" class="export-btn">📥 Download CSV Report</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td><strong>{{ log.name }}</strong></td>
+                        <td>{{ log.id }}</td>
+                        <td style="color: #64748b;">{{ log.time }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
 </body>
 </html>
